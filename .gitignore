@@ -1,7 +1,12 @@
 # Sensitive config and credentials
 confs/*.json
 confs/csvimport.conf
-confs/csvimport.conf.*
+confs/csvimport.conf.[0-9]*
+
+# Environment variable files
+.env
+.env.*
+.envrc
 
 # Logs and backups
 logs/
