@@ -300,9 +300,13 @@ def main():
         f"Starting csvimport for input files: {input_files}, output: {args.output}"
     )
 
-    # Default config path if not specified
-    config_path = args.config if args.config else "confs/csvimport.conf"
-    config = load_config(config_path)
+    # Load config: explicit path required; default only loaded if the file exists
+    if args.config:
+        config = load_config(args.config)
+    elif os.path.exists("confs/csvimport.conf"):
+        config = load_config("confs/csvimport.conf")
+    else:
+        config = {}
     input_format = get_format(
         config, args.org, "input_format", parse_format(args.input_format)
     )
