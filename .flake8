@@ -1,0 +1,5 @@
+[flake8]
+max-line-length = 88
+# E501: black owns line length, long strings/f-strings can't always be wrapped
+# E203: black's slice formatting conflicts with flake8
+extend-ignore = E203, E501
