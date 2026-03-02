@@ -168,17 +168,22 @@ def transform_csv(
     key_columns: Optional[List[str]] = None,
     logger: Optional[logging.Logger] = None,
 ):
+    use_debit_credit_split = (
+        "Debit" in output_format
+        and "Credit" in output_format
+        and "Amount" in input_format
+        and "Credit Debit Indicator" in input_format
+    )
+    if use_debit_credit_split and logger:
+        logger.info(
+            "Debit/Credit split transform active: routing Amount to Debit/Credit columns."
+        )
     with open(input_path, "r", encoding="utf-8-sig") as infile:
         reader = csv.DictReader(infile)
         transformed_rows = []
         for row in reader:
             # Special transform rules for excepted org: split Amount into Debit/Credit
-            if (
-                "Debit" in output_format
-                and "Credit" in output_format
-                and "Amount" in input_format
-                and "Credit Debit Indicator" in input_format
-            ):
+            if use_debit_credit_split:
                 debit = (
                     row["Amount"]
                     if row.get("Credit Debit Indicator") == "Debit"
@@ -203,10 +208,18 @@ def transform_csv(
             else:
                 new_row = {col: row.get(col, "") for col in output_format}
             transformed_rows.append(new_row)
+    if logger:
+        logger.debug(
+            f"transform_csv: read {len(transformed_rows)} rows from {input_path}"
+        )
     # Remove duplicates if existing_entries and key_columns are provided
     if existing_entries and key_columns and logger:
         transformed_rows = remove_duplicates(
             transformed_rows, existing_entries, key_columns, logger
+        )
+    if logger:
+        logger.info(
+            f"transform_csv: returning {len(transformed_rows)} rows after processing"
         )
     return transformed_rows
 
@@ -303,10 +316,13 @@ def main():
     # Load config: explicit path required; default only loaded if the file exists
     if args.config:
         config = load_config(args.config)
+        logger.info(f"Loaded config from: {args.config}")
     elif os.path.exists("confs/csvimport.conf"):
         config = load_config("confs/csvimport.conf")
+        logger.info("Loaded config from default: confs/csvimport.conf")
     else:
         config = {}
+        logger.info("No config file found; using empty config.")
     input_format = get_format(
         config, args.org, "input_format", parse_format(args.input_format)
     )
@@ -363,6 +379,7 @@ def main():
     )
     if args.key_columns:
         key_columns = [col.strip() for col in args.key_columns.split(",")]
+        logger.info(f"Using key_columns from CLI: {key_columns}")
     elif org_config.get("key_fields"):
         key_columns = [str(col).strip() for col in org_config["key_fields"]]
         logger.info(
@@ -410,7 +427,9 @@ def main():
         for input_path in input_files:
             with open(input_path, "r", encoding="utf-8-sig") as infile:
                 reader = csv.DictReader(infile)
-                rows.extend([row for row in reader])
+                file_rows = list(reader)
+                logger.debug(f"Read {len(file_rows)} rows from {input_path}")
+                rows.extend(file_rows)
         if existing_entries and key_columns:
             deduped_rows = remove_duplicates(
                 rows, existing_entries, key_columns, logger
@@ -423,7 +442,9 @@ def main():
         for input_path in input_files:
             with open(input_path, "r", encoding="utf-8-sig") as infile:
                 reader = csv.DictReader(infile)
-                all_rows.extend([row for row in reader])
+                file_rows = list(reader)
+                logger.debug(f"Read {len(file_rows)} rows from {input_path}")
+                all_rows.extend(file_rows)
         # Write merged rows to a temp file for transform_csv
         import tempfile
 
@@ -435,11 +456,12 @@ def main():
             for row in all_rows:
                 extra_fields = set(row.keys()) - set(input_format)
                 if extra_fields:
-                    print(
-                        f"Error: CSV contains fields not in input_format: {', '.join(sorted(extra_fields))}\n"
-                        f"Check the 'input_format' list for org '{args.org}' in your config file ({args.config}).",
-                        file=sys.stderr,
+                    msg = (
+                        f"CSV contains fields not in input_format: {', '.join(sorted(extra_fields))} — "
+                        f"Check the 'input_format' list for org '{args.org}' in your config file ({args.config})."
                     )
+                    logger.error(msg)
+                    print(f"Error: {msg}", file=sys.stderr)
                     sys.exit(2)
                 writer.writerow(row)
             temp_in_path = temp_in.name
@@ -453,6 +475,7 @@ def main():
             logger,
         )
 
+    logger.info(f"Final row count after deduplication: {len(deduped_rows)}")
     # Google Sheets integration: append deduplicated data and sort
     if sheet_name and sheet_id and creds_path:
         try:
@@ -506,14 +529,17 @@ def main():
             for row in deduped_rows:
                 extra_fields = set(row.keys()) - set(output_format)
                 if extra_fields:
-                    print(
-                        f"Error: Row contains fields not in output_format: {', '.join(sorted(extra_fields))}\n"
-                        f"Check the 'output_format' list for org '{args.org}' in your config file ({args.config}).",
-                        file=sys.stderr,
+                    msg = (
+                        f"Row contains fields not in output_format: {', '.join(sorted(extra_fields))} — "
+                        f"Check the 'output_format' list for org '{args.org}' in your config file ({args.config})."
                     )
+                    logger.error(msg)
+                    print(f"Error: {msg}", file=sys.stderr)
                     sys.exit(2)
                 writer.writerow(row)
-        logger.info(f"Deduplicated data written to {args.output}.")
+        logger.info(
+            f"Deduplicated data written to {args.output} ({len(deduped_rows)} rows)."
+        )
         print(f"Deduplicated data written to {args.output}.")
 
 
