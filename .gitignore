@@ -1,6 +1,7 @@
 # Sensitive config and credentials
 confs/*.json
 confs/csvimport.conf
+confs/csvimport.conf.*
 
 # Logs and backups
 logs/
