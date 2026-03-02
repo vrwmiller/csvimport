@@ -1,0 +1,14 @@
+organizations:
+  orgname1:
+    input_format: ["Transaction Date", "Post Date", "Description", "Category", "Type", "Amount", "Memo" ]
+    output_format: ["Transaction Date", "Post Date", "Description", "Category", "Type", "Amount", "Memo" ]
+    key_fields: ["Description", "Amount", "Transaction Date", "Post Date"]
+    sheet_name: orgname1_worksheet
+  orgname2:
+    input_format: ["Email", "Name", "Date"]
+    output_format: ["Email", "Name", "Date"]
+    key_fields: ["Email", "Name"]
+    sheet_name: orgname2_worksheet
+google:
+  creds: /path/to/sample-credentials.json
+  sheet_id: sample_google_sheet_id
