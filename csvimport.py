@@ -175,7 +175,9 @@ def transform_csv(
         and "Credit Debit Indicator" in input_format
     )
     if use_debit_credit_split and logger:
-        logger.info("Debit/Credit split transform active: routing Amount to Debit/Credit columns.")
+        logger.info(
+            "Debit/Credit split transform active: routing Amount to Debit/Credit columns."
+        )
     with open(input_path, "r", encoding="utf-8-sig") as infile:
         reader = csv.DictReader(infile)
         transformed_rows = []
@@ -207,14 +209,18 @@ def transform_csv(
                 new_row = {col: row.get(col, "") for col in output_format}
             transformed_rows.append(new_row)
     if logger:
-        logger.debug(f"transform_csv: read {len(transformed_rows)} rows from {input_path}")
+        logger.debug(
+            f"transform_csv: read {len(transformed_rows)} rows from {input_path}"
+        )
     # Remove duplicates if existing_entries and key_columns are provided
     if existing_entries and key_columns and logger:
         transformed_rows = remove_duplicates(
             transformed_rows, existing_entries, key_columns, logger
         )
     if logger:
-        logger.info(f"transform_csv: returning {len(transformed_rows)} rows after processing")
+        logger.info(
+            f"transform_csv: returning {len(transformed_rows)} rows after processing"
+        )
     return transformed_rows
 
 
@@ -531,7 +537,9 @@ def main():
                     print(f"Error: {msg}", file=sys.stderr)
                     sys.exit(2)
                 writer.writerow(row)
-        logger.info(f"Deduplicated data written to {args.output} ({len(deduped_rows)} rows).")
+        logger.info(
+            f"Deduplicated data written to {args.output} ({len(deduped_rows)} rows)."
+        )
         print(f"Deduplicated data written to {args.output}.")
 
 
