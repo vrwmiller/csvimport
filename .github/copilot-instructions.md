@@ -39,6 +39,7 @@ requirements.txt
   - `docs/` — documentation only
 - CI must pass (lint + tests) before a PR can be merged.
 - Keep PRs focused. One logical change per PR.
+- Use the `gh` CLI for all git operations (branch creation, push, PR creation). Do not use GitKraken or other MCP-based git tools.
 
 ## Code style
 
