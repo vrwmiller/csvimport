@@ -119,3 +119,17 @@ google:
 | 2 | Configuration or field mismatch error |
 | 3 | Google Sheets fetch failure |
 | 4 | Google Sheets write/sort failure |
+
+## Pull request descriptions
+
+- For small PRs, keep descriptions concise and explicit about what changed and why.
+- For larger PRs, include: summary, file-level changes, rationale, testing, and risk notes.
+
+## GitHub CLI body-file workflow
+
+- For multi-line content in `gh` commands, always use `--body-file`.
+- Create a temporary body file via editor tooling and pass it to:
+  - `gh pr create --body-file /tmp/pr-body.txt`
+  - `gh pr edit <number> --body-file /tmp/pr-body.txt`
+  - `gh issue create --body-file /tmp/issue-body.txt`
+- Do not use shell heredocs for body content in this environment.
