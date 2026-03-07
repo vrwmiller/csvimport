@@ -87,7 +87,7 @@ flowchart TD
 
 ## Mermaid Workflow Diagram
 
-See `docs/csvimport.md` for a visual workflow.
+See `docs/WORKFLOW.md` for the current runtime flowchart.
 
 ## Authors & Contributors
 
