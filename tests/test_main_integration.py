@@ -272,6 +272,106 @@ def test_main_input_files_multi_flag(tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# --dry-run flag
+# ---------------------------------------------------------------------------
+
+
+def test_main_dry_run_gsheets_no_write(tmp_path):
+    """--dry-run with sheet args skips all GSheets calls entirely."""
+    input_csv = tmp_path / "input.csv"
+    log_file = tmp_path / "test.log"
+    creds_file = tmp_path / "creds.json"
+    creds_file.write_text("{}")
+
+    _write_csv(
+        input_csv,
+        COLS,
+        [{"Date": "2026-04-01", "Amount": "15.00", "Description": "Dry"}],
+    )
+
+    mock_gspread, mock_creds_module, mock_cred_cls, mock_worksheet = (
+        _make_gsheets_mocks()
+    )
+
+    with mock.patch.dict(
+        sys.modules,
+        {
+            "gspread": mock_gspread,
+            "google.oauth2.service_account": mock_creds_module,
+        },
+    ):
+        with mock.patch("csvimport.gspread", mock_gspread), mock.patch(
+            "csvimport.Credentials", mock_cred_cls
+        ):
+            _call_main(
+                [
+                    "--input-files",
+                    str(input_csv),
+                    "--input-format",
+                    "Date,Amount,Description",
+                    "--output-format",
+                    "Date,Amount,Description",
+                    "--existing-sheet-id",
+                    "fake-sheet-id",
+                    "--sheet-name",
+                    "Transactions",
+                    "--google-creds",
+                    str(creds_file),
+                    "--log-file",
+                    str(log_file),
+                    "--dry-run",
+                ]
+            )
+
+    mock_gspread.authorize.assert_not_called()
+    mock_gspread.authorize.return_value.open_by_key.assert_not_called()
+    mock_worksheet.insert_rows.assert_not_called()
+    mock_worksheet.sort.assert_not_called()
+
+
+def test_main_dry_run_skips_output(tmp_path):
+    """--dry-run prints rows that would be inserted but does not write output."""
+    input_csv = tmp_path / "input.csv"
+    output_csv = tmp_path / "output.csv"
+    log_file = tmp_path / "test.log"
+
+    _write_csv(
+        input_csv,
+        COLS,
+        [
+            {"Date": "2026-03-01", "Amount": "10.00", "Description": "Alpha"},
+            {"Date": "2026-03-02", "Amount": "20.00", "Description": "Beta"},
+        ],
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            SCRIPT,
+            "--input-files",
+            str(input_csv),
+            "--input-format",
+            "Date,Amount,Description",
+            "--output-format",
+            "Date,Amount,Description",
+            "--output",
+            str(output_csv),
+            "--dry-run",
+            "--log-file",
+            str(log_file),
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    # Output file should not be created because dry-run skips the write path
+    assert not output_csv.exists()
+    # stdout should mention the row count
+    assert "2 row(s) would be written to" in result.stdout
+
+
+# ---------------------------------------------------------------------------
 # Shared helpers for GSheets unit tests (items 10 and 11)
 # ---------------------------------------------------------------------------
 
