@@ -491,13 +491,36 @@ def main():
     logger.info(f"Final row count after deduplication: {len(deduped_rows)}")
     # Google Sheets integration: append deduplicated data and sort
     if args.dry_run:
-        print(
-            f"Dry run: {len(deduped_rows)} row(s) would be inserted into Google Sheet '{sheet_name}'."
-        )
+        if sheet_name and sheet_id and creds_path:
+            target_desc = f"Google Sheet '{sheet_name}'"
+        elif getattr(args, "output", None):
+            target_desc = f"output CSV '{args.output}'"
+        else:
+            target_desc = "configured output target"
+        print(f"Dry run: {len(deduped_rows)} row(s) would be written to {target_desc}.")
+        # Validate output_format fields (mirrors the --output CSV write path)
+        if output_format:
+            for row in deduped_rows:
+                extra_fields = set(row.keys()) - set(output_format)
+                if extra_fields:
+                    msg = (
+                        f"Row contains fields not in output_format: {', '.join(sorted(extra_fields))} — "
+                        f"Check the 'output_format' list for org '{args.org}' in your config file ({args.config})."
+                    )
+                    logger.error(msg)
+                    print(f"Error: {msg}", file=sys.stderr)
+                    sys.exit(2)
+        # Mirror the actual write path: build rows using output_format and extra_columns
+        extra_columns = org_config.get("extra_columns", []) if org_config else []
         for row in deduped_rows:
-            print(" ", dict(row))
+            if output_format:
+                base_row = [row.get(col, "") for col in output_format]
+                full_row = base_row + list(extra_columns)
+                print(" ", full_row)
+            else:
+                print(" ", dict(row))
         logger.info(
-            f"Dry run complete. {len(deduped_rows)} row(s) would have been inserted."
+            f"Dry run complete. {len(deduped_rows)} row(s) would have been written."
         )
         return
     if sheet_name and sheet_id and creds_path:

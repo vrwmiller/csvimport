@@ -276,6 +276,55 @@ def test_main_input_files_multi_flag(tmp_path):
 # ---------------------------------------------------------------------------
 
 
+def test_main_dry_run_gsheets_no_write(tmp_path):
+    """--dry-run with sheet args skips insert_rows and sort entirely."""
+    input_csv = tmp_path / "input.csv"
+    log_file = tmp_path / "test.log"
+    creds_file = tmp_path / "creds.json"
+    creds_file.write_text("{}")
+
+    _write_csv(
+        input_csv,
+        COLS,
+        [{"Date": "2026-04-01", "Amount": "15.00", "Description": "Dry"}],
+    )
+
+    mock_gspread, mock_creds_module, mock_cred_cls, mock_worksheet = (
+        _make_gsheets_mocks()
+    )
+
+    with mock.patch.dict(
+        sys.modules,
+        {
+            "gspread": mock_gspread,
+            "google.oauth2.service_account": mock_creds_module,
+        },
+    ):
+        with mock.patch("csvimport.gspread", mock_gspread), mock.patch(
+            "csvimport.Credentials", mock_cred_cls
+        ):
+            _call_main(
+                [
+                    "--input-files",
+                    str(input_csv),
+                    "--input-format",
+                    "Date,Amount,Description",
+                    "--output-format",
+                    "Date,Amount,Description",
+                    "--sheet-name",
+                    "Transactions",
+                    "--google-creds",
+                    str(creds_file),
+                    "--log-file",
+                    str(log_file),
+                    "--dry-run",
+                ]
+            )
+
+    mock_worksheet.insert_rows.assert_not_called()
+    mock_worksheet.sort.assert_not_called()
+
+
 def test_main_dry_run_skips_output(tmp_path):
     """--dry-run prints rows that would be inserted but does not write output."""
     input_csv = tmp_path / "input.csv"
@@ -315,7 +364,7 @@ def test_main_dry_run_skips_output(tmp_path):
     # Output file should not be created because dry-run skips the write path
     assert not output_csv.exists()
     # stdout should mention the row count
-    assert "2 row(s) would be inserted" in result.stdout
+    assert "2 row(s) would be written to" in result.stdout
 
 
 # ---------------------------------------------------------------------------

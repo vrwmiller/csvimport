@@ -110,7 +110,7 @@ google:
 | `--google-creds` | Path to service account JSON (overrides config) |
 | `--log-file` | Log file path (default: `logs/csvimport.log`) |
 | `--debug` | Enable debug logging to stdout |
-| `--dry-run` | Process and deduplicate but skip writing to Google Sheets; prints rows that would be inserted |
+| `--dry-run` | Process and deduplicate but skip all writes (Google Sheets and `--output` CSV); prints rows that would be inserted |
 
 ## Exit codes
 

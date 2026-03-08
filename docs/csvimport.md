@@ -33,7 +33,7 @@ python csvimport.py --input-files <file1.csv> [--input-files <file2.csv> ...] --
 - `--org`: Organization name for config lookup
 - `--config`: Path to config file (default: confs/csvimport.conf)
 - `--output`: Optional output CSV file
-- `--dry-run`: Process and deduplicate data but skip writing to Google Sheets. Prints the row count and each row that would be inserted.
+- `--dry-run`: Process and deduplicate data but skip all write operations (no Google Sheets upload and no output CSV). Prints the row count and each row that would be written.
 
 ## Configuration
 
