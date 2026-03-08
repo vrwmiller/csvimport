@@ -445,24 +445,25 @@ def main():
         # Write merged rows to a temp file for transform_csv
         import tempfile
 
-        with tempfile.NamedTemporaryFile(
-            mode="w+", delete=False, newline="", encoding="utf-8"
-        ) as temp_in:
-            writer = csv.DictWriter(temp_in, fieldnames=input_format)
-            writer.writeheader()
-            for row in all_rows:
-                extra_fields = set(row.keys()) - set(input_format)
-                if extra_fields:
-                    msg = (
-                        f"CSV contains fields not in input_format: {', '.join(sorted(extra_fields))} — "
-                        f"Check the 'input_format' list for org '{args.org}' in your config file ({args.config})."
-                    )
-                    logger.error(msg)
-                    print(f"Error: {msg}", file=sys.stderr)
-                    sys.exit(2)
-                writer.writerow(row)
-            temp_in_path = temp_in.name
+        temp_in_path = None
         try:
+            with tempfile.NamedTemporaryFile(
+                mode="w+", delete=False, newline="", encoding="utf-8"
+            ) as temp_in:
+                temp_in_path = temp_in.name
+                writer = csv.DictWriter(temp_in, fieldnames=input_format)
+                writer.writeheader()
+                for row in all_rows:
+                    extra_fields = set(row.keys()) - set(input_format)
+                    if extra_fields:
+                        msg = (
+                            f"CSV contains fields not in input_format: {', '.join(sorted(extra_fields))} — "
+                            f"Check the 'input_format' list for org '{args.org}' in your config file ({args.config})."
+                        )
+                        logger.error(msg)
+                        print(f"Error: {msg}", file=sys.stderr)
+                        sys.exit(2)
+                    writer.writerow(row)
             deduped_rows = transform_csv(
                 temp_in_path,
                 input_format,
@@ -472,7 +473,8 @@ def main():
                 logger,
             )
         finally:
-            os.unlink(temp_in_path)
+            if temp_in_path and os.path.exists(temp_in_path):
+                os.unlink(temp_in_path)
 
     logger.info(f"Final row count after deduplication: {len(deduped_rows)}")
     # Google Sheets integration: append deduplicated data and sort
