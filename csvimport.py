@@ -161,7 +161,6 @@ def fetch_sheet_entries(
 # --- CSV transformation ---
 def transform_csv(
     input_path: str,
-    output_path: str,
     input_format: List[str],
     output_format: List[str],
     existing_entries: Optional[List[Dict]] = None,
@@ -348,6 +347,7 @@ def main():
         args.existing_sheet_id, google_config, "sheet_id", "GOOGLE_SHEET_ID"
     )
     # Determine sheet_name: CLI > org config > global config > env
+    # org_config is also used later for key_fields, extra_columns, etc.
     org_config = (
         config.get("organizations", {}).get(args.org, {}) if config and args.org else {}
     )
@@ -374,9 +374,6 @@ def main():
         )
     existing_entries = None
     key_columns = None
-    org_config = (
-        config.get("organizations", {}).get(args.org, {}) if config and args.org else {}
-    )
     if args.key_columns:
         key_columns = [col.strip() for col in args.key_columns.split(",")]
         logger.info(f"Using key_columns from CLI: {key_columns}")
@@ -465,23 +462,22 @@ def main():
                     sys.exit(2)
                 writer.writerow(row)
             temp_in_path = temp_in.name
-        deduped_rows = transform_csv(
-            temp_in_path,
-            args.output,
-            input_format,
-            output_format,
-            existing_entries,
-            key_columns,
-            logger,
-        )
+        try:
+            deduped_rows = transform_csv(
+                temp_in_path,
+                input_format,
+                output_format,
+                existing_entries,
+                key_columns,
+                logger,
+            )
+        finally:
+            os.unlink(temp_in_path)
 
     logger.info(f"Final row count after deduplication: {len(deduped_rows)}")
     # Google Sheets integration: append deduplicated data and sort
     if sheet_name and sheet_id and creds_path:
         try:
-            import gspread
-            from google.oauth2.service_account import Credentials
-
             creds = Credentials.from_service_account_file(
                 creds_path,
                 scopes=[
