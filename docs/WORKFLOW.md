@@ -54,10 +54,11 @@ flowchart TD
   R --> W
   VCLEAN --> W
 
-  W --> X{sheet_name + sheet_id + creds present?}
+  W --> DR{--dry-run?}
+  DR -->|Yes| DRP[Print rows that would be written and return]
+  DR -->|No| X{sheet_name + sheet_id + creds present?}
 
-  X -->|Yes| GS_START[ ]
-  GS_START --> Y[Authorize Google client and open worksheet]
+  X -->|Yes| Y[Authorize Google client and open worksheet]
   Y --> Z[Build rows with optional extra_columns]
   Z --> AA{Rows to insert?}
   AA -->|Yes| AB[Insert rows at row 2]
@@ -65,7 +66,7 @@ flowchart TD
   AB --> AD[Sort worksheet by column A descending]
   AC --> AD
   AD --> AE[Print sheet success message]
-  GS_START -->|Any write-path failure: creds / auth / open / insert / sort| AERR[Print error and exit 4]
+  Y -->|Any failure: creds / auth / open / insert / sort| AERR[Print error and exit 4]
 
   X -->|No| AF{--output provided?}
   AF -->|Yes| AG[Write deduplicated rows to output CSV]
@@ -74,7 +75,8 @@ flowchart TD
   AH -->|No| AI[Print output success message]
   AF -->|No| AJ[Finish without upload/output file]
 
-  AE --> END([Exit 0])
+  DRP --> END([Exit 0])
+  AE --> END
   AI --> END
   AJ --> END
 ```
