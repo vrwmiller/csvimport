@@ -19,10 +19,17 @@
 ### Command Line Options
 
 ```
-python csvimport.py --input-files <csv1,csv2,...> --org <org> [--config <config>] [--output <output.csv>] [--dry-run]
+python csvimport.py --input-files <file1.csv> [--input-files <file2.csv> ...] --org <org> [--config <config>] [--output <output.csv>]
 ```
 
-- `--input-files`: Comma-separated list of CSV files to merge and process
+- `--input-files`: Input CSV file to merge and process. Repeat the flag for each additional file (recommended — enables shell tab-completion per file):
+  ```
+  python csvimport.py --input-files jan.csv --input-files feb.csv --org myorg
+  ```
+  A comma-separated list in a single flag is also accepted for backward compatibility:
+  ```
+  python csvimport.py --input-files jan.csv,feb.csv --org myorg
+  ```
 - `--org`: Organization name for config lookup
 - `--config`: Path to config file (default: confs/csvimport.conf)
 - `--output`: Optional output CSV file

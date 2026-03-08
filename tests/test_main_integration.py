@@ -220,6 +220,58 @@ def test_main_key_columns_cli_dedup_on_single_column(tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# --input-files repeated flag
+# ---------------------------------------------------------------------------
+
+
+def test_main_input_files_multi_flag(tmp_path):
+    """--input-files can be specified multiple times; rows from all files appear."""
+    input_a = tmp_path / "a.csv"
+    input_b = tmp_path / "b.csv"
+    output_csv = tmp_path / "output.csv"
+    log_file = tmp_path / "test.log"
+
+    _write_csv(
+        input_a,
+        COLS,
+        [{"Date": "2026-01-01", "Amount": "10.00", "Description": "Alpha"}],
+    )
+    _write_csv(
+        input_b,
+        COLS,
+        [{"Date": "2026-01-02", "Amount": "20.00", "Description": "Beta"}],
+    )
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            SCRIPT,
+            "--input-files",
+            str(input_a),
+            "--input-files",
+            str(input_b),
+            "--input-format",
+            "Date,Amount,Description",
+            "--output-format",
+            "Date,Amount,Description",
+            "--output",
+            str(output_csv),
+            "--log-file",
+            str(log_file),
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0, result.stderr
+    rows = _read_csv(output_csv)
+    assert len(rows) == 2
+    dates = {r["Date"] for r in rows}
+    assert "2026-01-01" in dates
+    assert "2026-01-02" in dates
+
+
+# ---------------------------------------------------------------------------
 # Shared helpers for GSheets unit tests (items 10 and 11)
 # ---------------------------------------------------------------------------
 

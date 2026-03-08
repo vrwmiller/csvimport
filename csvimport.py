@@ -255,7 +255,12 @@ def main():
         description="Import and transform CSV files for multiple organizations."
     )
     parser.add_argument(
-        "--input-files", required=True, help="Comma-separated list of input CSV files"
+        "--input-files",
+        required=True,
+        action="append",
+        dest="input_files",
+        metavar="FILE",
+        help="Input CSV file. Repeat for multiple files: --input-files a.csv --input-files b.csv. Also accepts a comma-separated list in a single flag.",
     )
     parser.add_argument(
         "--output",
@@ -307,7 +312,9 @@ def main():
     args = parser.parse_args()
 
     logger = setup_logging(args.debug, args.log_file)
-    input_files = [f.strip() for f in args.input_files.split(",")]
+    input_files = [
+        f.strip() for entry in args.input_files for f in entry.split(",") if f.strip()
+    ]
     logger.info(
         f"Starting csvimport for input files: {input_files}, output: {args.output}"
     )
