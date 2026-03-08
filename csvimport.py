@@ -306,6 +306,11 @@ def main():
         "--google-creds", help="Path to Google service account credentials JSON file"
     )
     parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Process and deduplicate data but skip writing to Google Sheets. Prints what would be inserted.",
+    )
+    parser.add_argument(
         "--key-columns",
         help="Comma-separated list of columns to use for duplicate detection",
     )
@@ -485,6 +490,16 @@ def main():
 
     logger.info(f"Final row count after deduplication: {len(deduped_rows)}")
     # Google Sheets integration: append deduplicated data and sort
+    if args.dry_run:
+        print(
+            f"Dry run: {len(deduped_rows)} row(s) would be inserted into Google Sheet '{sheet_name}'."
+        )
+        for row in deduped_rows:
+            print(" ", dict(row))
+        logger.info(
+            f"Dry run complete. {len(deduped_rows)} row(s) would have been inserted."
+        )
+        return
     if sheet_name and sheet_id and creds_path:
         try:
             creds = Credentials.from_service_account_file(

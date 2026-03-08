@@ -97,7 +97,7 @@ google:
 
 | Flag | Description |
 |---|---|
-| `--input-files` | Comma-separated CSV input paths (required) |
+| `--input-files` | Input CSV file (required). Repeat for multiple files: `--input-files a.csv --input-files b.csv`. Also accepts a comma-separated list. |
 | `--org` | Organization key for config lookup |
 | `--config` | Path to config file (default: `confs/csvimport.conf`) |
 | `--output` | Output CSV path (optional, used when not uploading to Sheets) |
@@ -110,6 +110,7 @@ google:
 | `--google-creds` | Path to service account JSON (overrides config) |
 | `--log-file` | Log file path (default: `logs/csvimport.log`) |
 | `--debug` | Enable debug logging to stdout |
+| `--dry-run` | Process and deduplicate but skip writing to Google Sheets; prints rows that would be inserted |
 
 ## Exit codes
 

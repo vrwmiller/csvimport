@@ -19,7 +19,7 @@
 ### Command Line Options
 
 ```
-python csvimport.py --input-files <file1.csv> [--input-files <file2.csv> ...] --org <org> [--config <config>] [--output <output.csv>]
+python csvimport.py --input-files <file1.csv> [--input-files <file2.csv> ...] --org <org> [--config <config>] [--output <output.csv>] [--dry-run]
 ```
 
 - `--input-files`: Input CSV file to merge and process. Repeat the flag for each additional file (recommended — enables shell tab-completion per file):
@@ -33,7 +33,7 @@ python csvimport.py --input-files <file1.csv> [--input-files <file2.csv> ...] --
 - `--org`: Organization name for config lookup
 - `--config`: Path to config file (default: confs/csvimport.conf)
 - `--output`: Optional output CSV file
-- `--dry-run`: Preview changes without modifying the target data store
+- `--dry-run`: Process and deduplicate data but skip writing to Google Sheets. Prints the row count and each row that would be inserted.
 
 ## Configuration
 
@@ -88,8 +88,6 @@ flowchart TD
 - Coverage reporting with `pytest-cov` (optional)
 
 ## Planned Features
-
-- Dry-run option
 - Organization-specific category mapping
 
 ## Mermaid Workflow Diagram
