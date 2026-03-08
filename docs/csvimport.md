@@ -19,7 +19,7 @@
 ### Command Line Options
 
 ```
-python csvimport.py --input-files <file1.csv> [--input-files <file2.csv> ...] --org <org> [--config <config>] [--output <output.csv>] [--dry-run]
+python csvimport.py --input-files <file1.csv> [--input-files <file2.csv> ...] --org <org> [--config <config>] [--output <output.csv>]
 ```
 
 - `--input-files`: Input CSV file to merge and process. Repeat the flag for each additional file (recommended — enables shell tab-completion per file):
