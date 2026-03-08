@@ -277,7 +277,7 @@ def test_main_input_files_multi_flag(tmp_path):
 
 
 def test_main_dry_run_gsheets_no_write(tmp_path):
-    """--dry-run with sheet args skips insert_rows and sort entirely."""
+    """--dry-run with sheet args skips all GSheets calls entirely."""
     input_csv = tmp_path / "input.csv"
     log_file = tmp_path / "test.log"
     creds_file = tmp_path / "creds.json"
@@ -311,6 +311,8 @@ def test_main_dry_run_gsheets_no_write(tmp_path):
                     "Date,Amount,Description",
                     "--output-format",
                     "Date,Amount,Description",
+                    "--existing-sheet-id",
+                    "fake-sheet-id",
                     "--sheet-name",
                     "Transactions",
                     "--google-creds",
@@ -321,6 +323,8 @@ def test_main_dry_run_gsheets_no_write(tmp_path):
                 ]
             )
 
+    mock_gspread.authorize.assert_not_called()
+    mock_gspread.authorize.return_value.open_by_key.assert_not_called()
     mock_worksheet.insert_rows.assert_not_called()
     mock_worksheet.sort.assert_not_called()
 

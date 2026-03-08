@@ -308,7 +308,7 @@ def main():
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="Process and deduplicate data but skip writing to Google Sheets. Prints what would be inserted.",
+        help="Process and deduplicate data but skip all writes (Google Sheets upload and --output CSV). Prints what would be inserted.",
     )
     parser.add_argument(
         "--key-columns",
