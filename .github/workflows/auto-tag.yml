@@ -32,7 +32,7 @@ jobs:
           default_bump: false
           release_branches: main
           tag_prefix: v
-          minor_wording: feat,feature
+          default_minor_wording: feat,feature
 
       - name: Create GitHub Release
         if: steps.tag.outputs.new_tag != ''
