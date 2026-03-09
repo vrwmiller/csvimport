@@ -16,7 +16,7 @@ applyTo: "**/*.{py,yml,yaml}"
 - Indent with 2 spaces; never use tabs.
 - Quote string values that contain colons, special characters, or template expressions (`${{ }}`).
 - Every GitHub Actions workflow must have a `name:` at the top level.
-- Every job must have a `name:` and explicit `runs-on:`.
+- Every job must have an explicit `runs-on:`. A `name:` on jobs and steps is preferred but not required for simple single-step jobs.
 - Pin third-party actions to a specific version tag (e.g., `@v4`, `@v6.2`), not `@main` or `@latest`.
 - Avoid redundant `true`/`false` string values where a boolean is expected.
 - Keep `on:` trigger blocks at the top of the file, directly after `name:`.

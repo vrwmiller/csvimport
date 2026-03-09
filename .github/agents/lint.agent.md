@@ -24,7 +24,7 @@ Report each violation grouped by file with line numbers and a brief description.
 - For flake8 violations that black cannot fix (e.g., unused imports, bare `except`, line logic), edit the file directly and re-run `flake8` to confirm zero violations.
 
 ### 3. Fix YAML issues
-For any `.github/workflows/*.yml` file mentioned by the user or currently open:
+For each `.github/workflows/*.yml` file in the repo:
 - Check indentation (must be 2 spaces, no tabs).
 - Confirm all jobs and steps have a `name:`.
 - Confirm third-party actions are pinned to a version tag (not `@main` or `@latest`).
