@@ -18,6 +18,7 @@ applyTo: "**/*.{py,yml,yaml}"
 - Every GitHub Actions workflow must have a `name:` at the top level.
 - Every job must have an explicit `runs-on:`. A `name:` on jobs and steps is preferred but not required for simple single-step jobs.
 - Pin third-party actions to a specific version tag (e.g., `@v4`, `@v6.2`), not `@main` or `@latest`.
+- Action `with:` keys must match the input names documented in the action's `action.yml`/`action.yaml` metadata file. Invalid input keys are silently ignored at runtime and will not produce an error — verify spelling against the action's source or docs.
 - Avoid redundant `true`/`false` string values where a boolean is expected.
 - Keep `on:` trigger blocks at the top of the file, directly after `name:`.
 
@@ -26,6 +27,7 @@ applyTo: "**/*.{py,yml,yaml}"
 - f-strings that concatenate where a format string would be cleaner.
 - YAML keys that duplicate or shadow an earlier key in the same mapping.
 - Actions steps missing a `name:`.
+- Action `with:` blocks that use an input key not present in the action's documented inputs (these keys are silently ignored at runtime and will not cause an error).
 - Workflow `env:` blocks that contain literal secrets or credentials.
 
 ## Fast verification commands
