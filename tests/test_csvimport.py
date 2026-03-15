@@ -42,6 +42,30 @@ def test_remove_duplicates_basic():
     assert deduped == [{"A": "2", "B": "y"}]
 
 
+def test_remove_duplicates_intra_batch():
+    """Two identical rows in the input batch with no existing entries — only one should survive."""
+    rows = [
+        {"Description": "BP GAS", "Amount": "-34.93"},
+        {"Description": "BP GAS", "Amount": "-34.93"},
+        {"Description": "GROCERY", "Amount": "-12.00"},
+    ]
+    existing = []
+    key_columns = ["Description", "Amount"]
+
+    class DummyLogger:
+        def debug(self, msg):
+            pass
+
+        def info(self, msg):
+            pass
+
+    deduped = remove_duplicates(rows, existing, key_columns, DummyLogger())
+    assert deduped == [
+        {"Description": "BP GAS", "Amount": "-34.93"},
+        {"Description": "GROCERY", "Amount": "-12.00"},
+    ]
+
+
 def test_merge_multiple_input_files(tmp_path):
     import subprocess
 

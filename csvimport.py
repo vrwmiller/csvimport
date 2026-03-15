@@ -93,6 +93,7 @@ def remove_duplicates(
         key = tuple(str(row.get(col, "")) for col in key_columns)
         if key not in existing_keys:
             result.append(row)
+            existing_keys.add(key)
         else:
             logger.info(f"Duplicate found and removed: {key}")
     logger.info(f"Total duplicates removed: {len(transformed_rows) - len(result)}")
