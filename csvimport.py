@@ -215,10 +215,10 @@ def transform_csv(
         logger.debug(
             f"transform_csv: read {len(transformed_rows)} rows from {input_path}"
         )
-    # Remove duplicates if existing_entries and key_columns are provided
-    if existing_entries and key_columns and logger:
+    # Remove duplicates whenever key_columns are set (existing_entries may be empty)
+    if key_columns and logger:
         transformed_rows = remove_duplicates(
-            transformed_rows, existing_entries, key_columns, logger
+            transformed_rows, existing_entries or [], key_columns, logger
         )
     if logger:
         logger.info(
@@ -443,9 +443,9 @@ def main():
                 file_rows = list(reader)
                 logger.debug(f"Read {len(file_rows)} rows from {input_path}")
                 rows.extend(file_rows)
-        if existing_entries and key_columns:
+        if key_columns:
             deduped_rows = remove_duplicates(
-                rows, existing_entries, key_columns, logger
+                rows, existing_entries or [], key_columns, logger
             )
         else:
             deduped_rows = rows
