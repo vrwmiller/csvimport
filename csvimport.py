@@ -77,6 +77,9 @@ def remove_duplicates(
     logger.debug(
         f"Input rows: {len(transformed_rows)}, Existing entries: {len(existing_entries)}"
     )
+    if not key_columns:
+        logger.info("Total duplicates removed: 0")
+        return list(transformed_rows)
     # Log sample key tuples for inspection
     for i, entry in enumerate(existing_entries[:5]):
         key = tuple(str(entry.get(col, "")) for col in key_columns)
