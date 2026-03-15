@@ -77,6 +77,9 @@ def remove_duplicates(
     logger.debug(
         f"Input rows: {len(transformed_rows)}, Existing entries: {len(existing_entries)}"
     )
+    if not key_columns:
+        logger.info("Total duplicates removed: 0")
+        return list(transformed_rows)
     # Log sample key tuples for inspection
     for i, entry in enumerate(existing_entries[:5]):
         key = tuple(str(entry.get(col, "")) for col in key_columns)
@@ -93,8 +96,9 @@ def remove_duplicates(
         key = tuple(str(row.get(col, "")) for col in key_columns)
         if key not in existing_keys:
             result.append(row)
+            existing_keys.add(key)
         else:
-            logger.info(f"Duplicate found and removed: {key}")
+            logger.debug(f"Duplicate found and removed: {key}")
     logger.info(f"Total duplicates removed: {len(transformed_rows) - len(result)}")
     return result
 
@@ -211,10 +215,10 @@ def transform_csv(
         logger.debug(
             f"transform_csv: read {len(transformed_rows)} rows from {input_path}"
         )
-    # Remove duplicates if existing_entries and key_columns are provided
-    if existing_entries and key_columns and logger:
+    # Remove duplicates whenever key_columns are set (existing_entries may be empty)
+    if key_columns and logger:
         transformed_rows = remove_duplicates(
-            transformed_rows, existing_entries, key_columns, logger
+            transformed_rows, existing_entries or [], key_columns, logger
         )
     if logger:
         logger.info(
@@ -439,9 +443,9 @@ def main():
                 file_rows = list(reader)
                 logger.debug(f"Read {len(file_rows)} rows from {input_path}")
                 rows.extend(file_rows)
-        if existing_entries and key_columns:
+        if key_columns:
             deduped_rows = remove_duplicates(
-                rows, existing_entries, key_columns, logger
+                rows, existing_entries or [], key_columns, logger
             )
         else:
             deduped_rows = rows
