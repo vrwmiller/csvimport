@@ -98,7 +98,7 @@ def remove_duplicates(
             result.append(row)
             existing_keys.add(key)
         else:
-            logger.info(f"Duplicate found and removed: {key}")
+            logger.debug(f"Duplicate found and removed: {key}")
     logger.info(f"Total duplicates removed: {len(transformed_rows) - len(result)}")
     return result
 
